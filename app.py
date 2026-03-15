@@ -77,8 +77,12 @@ def clear_cart():
     return redirect(url_for('home'))
 
 @app.route('/ready')
+def ready():
+    return jsonify({"status": "ready"})
 
 @app.route('/healthz')
+def healthz():
+    return jsonify({"status": "healthy"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
