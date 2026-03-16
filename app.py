@@ -39,7 +39,7 @@ class Product(db.Model):
     name = db.Column(db.String(100))
     description = db.Column(db.String(250))
 
-
+print("Intentando conectar a la base de datos...")
 
 @app.route('/')
 def home():
