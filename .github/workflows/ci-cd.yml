@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          # Usamos el SHA del commit como tag para que sea único
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/python-frontend:${{ github.sha }} .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-frontend:${{ github.sha }}
+
+  update-manifests:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Manifests Repo
+        uses: actions/checkout@v3
+        with:
+          repository: andresafag/app-manifests # TU REPO DE MANIFIESTOS
+          token: ${{ secrets.GHTOKEN }} # Un Personal Access Token de GitHub
+
+      - name: Update values.yaml
+        run: |
+          # Instalamos yq para editar el YAML fácilmente
+          sudo wget https://github.com -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+          
+          # Actualizamos el tag con el SHA del commit actual
+          yq -i '.frontend.image.tag = "${{ github.sha }}"' values.yaml
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add values.yaml
+          git commit -m "chore: update frontend image to ${{ github.sha }}"
+          git push
