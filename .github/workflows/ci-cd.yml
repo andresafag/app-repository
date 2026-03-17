@@ -48,7 +48,7 @@ jobs:
         run: |
           # Usamos el comando sed que ya viene en Linux para editar el archivo
           # Es más rápido y no requiere instalar nada extra
-          sed -i 's/tag: .*/tag: "${{ github.run_number }}"/' values.yaml
+          sed -i 's/tag: .*/tag: v"${{ github.run_number }}"/' values.yaml
           # Verificamos el cambio para el log
           cat values.yaml
 
