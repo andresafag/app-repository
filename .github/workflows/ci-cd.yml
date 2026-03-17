@@ -19,9 +19,20 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          # Usamos el SHA del commit como tag para que sea único
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/python-frontend:${{ github.sha }} .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-frontend:${{ github.sha }}
+          declare -A IMAGES=(
+            ["frontend"]="python-frontend"
+            ["db"]="postgres-db"
+          )
+          VERSION=${{ github.run_number }}
+          
+          for folder in "${!IMAGES[@]}"; do
+            echo "Building image for $folder..."
+            cd "$folder"
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${IMAGES[$folder]}:v$VERSION .
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/${IMAGES[$folder]}:v$VERSION
+            cd ..
+          done
+
 
   update-manifests:
     needs: build-and-push
@@ -37,7 +48,7 @@ jobs:
         run: |
           # Usamos el comando sed que ya viene en Linux para editar el archivo
           # Es más rápido y no requiere instalar nada extra
-          sed -i 's/tag: .*/tag: "${{ github.sha }}"/' values.yaml
+          sed -i 's/tag: .*/tag: "${{ github.run_number }}"/' values.yaml
           # Verificamos el cambio para el log
           cat values.yaml
 
@@ -46,5 +57,5 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git add values.yaml
-          git commit -m "chore: update frontend image to ${{ github.sha }}"
+          git commit -m "chore: update frontend image to ${{ github.run_number }}"
           git push
