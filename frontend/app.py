@@ -29,7 +29,7 @@ productos = [
     {"id": 20, "nombre": "Gorra Urbana", "precio": 20, "imagen": "https://images.unsplash.com"},
 ]
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://myuser:mypassword@my-db:5432/store-app'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://env.process.POSTGRES_USER:env.process.POSTGRES_PASSWORD@my-db:5432/store-app'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
