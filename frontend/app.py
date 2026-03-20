@@ -1,6 +1,7 @@
 from flask import Flask, render_template, session, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
+import os
 
 app = Flask(__name__)
 app.secret_key = 'mi_llave_secreta_muy_segura' # Necesario para sesiones
@@ -29,7 +30,7 @@ productos = [
     {"id": 20, "nombre": "Gorra Urbana", "precio": 20, "imagen": "https://images.unsplash.com"},
 ]
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://env.process.POSTGRES_USER:env.process.POSTGRES_PASSWORD@my-db:5432/store-app'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://os.environ.get("POSTGRES_USER"):os.environ.get("POSTGRES_PASSWORD")@my-db:5432/store-app'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
